@@ -107,8 +107,9 @@ type ExpressFixtures = {
 
 export const express: ExpressFixtures = {
   cookie(val: string | object, secret: string | undefined): string {
-    const cookieValue = typeof val === "string" ? val : JSON.stringify(val)
-    const prefix = typeof val === "string" ? "s:" : "s:j:"
+    const cookieValue =
+      typeof val === "string" ? val : `j:${JSON.stringify(val)}`
+    const prefix = "s:"
 
     if (!secret) {
       return `${encodeURIComponent(prefix)}${cookieValue}`

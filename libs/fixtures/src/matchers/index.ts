@@ -1,5 +1,6 @@
+import { isDeepStrictEqual } from "node:util"
+
 import { EXPECTED_COLOR, RECEIVED_COLOR } from "jest-matcher-utils"
-import isEqual from "lodash.isequal"
 
 const checkErrorInstance = (
   subject: unknown,
@@ -26,7 +27,7 @@ const checkErrorInstance = (
 
   // Check properties
   for (const [key, value] of Object.entries(expectedProps)) {
-    if (!isEqual((subject as any)[key], value)) {
+    if (!isDeepStrictEqual((subject as any)[key], value)) {
       return {
         pass: false,
         message: () =>

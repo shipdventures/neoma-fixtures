@@ -21,21 +21,22 @@ describe("express", () => {
       )
     })
 
-    it("should sign an object value with s:j: prefix", () => {
+    it("should sign an object value with j: prefix in the signed payload", () => {
       const secret = "test-secret"
       const value = { userId: "abc" }
       const jsonValue = JSON.stringify(value)
+      const signedPayload = `j:${jsonValue}`
 
       const result = express.cookie(value, secret)
 
       const expectedSig = crypto
         .createHmac("sha256", secret)
-        .update(jsonValue)
+        .update(signedPayload)
         .digest("base64")
         .replace(/=+$/, "")
 
       expect(result).toBe(
-        `${encodeURIComponent("s:j:")}${jsonValue}.${encodeURIComponent(expectedSig)}`,
+        `${encodeURIComponent("s:")}${signedPayload}.${encodeURIComponent(expectedSig)}`,
       )
     })
 

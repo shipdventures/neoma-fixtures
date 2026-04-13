@@ -26,7 +26,7 @@ import type { MockRequest, MockResponse } from '@neoma/fixtures'
 const req = express.request()
 
 // Override specific properties
-const req = express.request({
+const customReq = express.request({
   method: 'POST',
   headers: { authorization: 'Bearer token' },
   body: { name: 'test' },
@@ -94,7 +94,7 @@ import { MockLoggerService } from '@neoma/fixtures'
 
 const logger = new MockLoggerService()
 // Use anywhere NestJS expects a LoggerService
-// All methods (log, error, warn, debug, trace, fatal) are jest.fn()
+// All methods (log, error, warn, debug, verbose, trace, fatal, setLogLevels) are jest.fn()
 
 logger.error('something failed')
 expect(logger.error).toHaveBeenCalledWith('something failed')
