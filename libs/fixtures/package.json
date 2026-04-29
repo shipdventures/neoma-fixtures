@@ -29,6 +29,18 @@
     "./matchers": {
       "require": "./dist/matchers/index.js",
       "types": "./dist/matchers/index.d.ts"
+    },
+    "./docker": {
+      "require": "./dist/docker/index.js",
+      "types": "./dist/docker/index.d.ts"
+    },
+    "./setup/mockserver": {
+      "require": "./dist/setup/mockserver.js",
+      "types": "./dist/setup/mockserver.d.ts"
+    },
+    "./teardown/mockserver": {
+      "require": "./dist/teardown/mockserver.js",
+      "types": "./dist/teardown/mockserver.d.ts"
     }
   },
   "scripts": {

@@ -9,9 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-### Changed
-
-### Removed
+- `startMockServer(options?)` — starts a MockServer Docker container with health-check polling and sets `MOCKSERVER_URL` env var
+- `stopMockServer(options?)` — stops the MockServer Docker container using the standard naming convention
+- `waitForHttp(url, options?)` — shared health-check utility that polls an HTTP endpoint until 2xx
+- `@neoma/fixtures/setup/mockserver` — Jest `globalSetup` drop-in for MockServer
+- `@neoma/fixtures/teardown/mockserver` — Jest `globalTeardown` drop-in for MockServer
+- `@neoma/fixtures/docker` — new sub-path export for Docker container utilities
 
 ## [0.1.0] - 2026-04-13
 

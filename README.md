@@ -128,6 +128,77 @@ expect(() => service.register(email)).toThrowMatching(
 expect(caughtError).toMatchError(NotFoundException, { message: 'Not found' })
 ```
 
+### Docker container utilities
+
+Start and stop Docker containers for test infrastructure. Available via `@neoma/fixtures/docker`.
+
+#### Zero-config Jest drop-ins
+
+Add to your Jest config for automatic container lifecycle:
+
+```json
+{
+  "globalSetup": "@neoma/fixtures/setup/mockserver",
+  "globalTeardown": "@neoma/fixtures/teardown/mockserver"
+}
+```
+
+For multiple services, write a custom setup file using the programmatic API:
+
+```typescript
+import { startMockServer, startMailpit } from '@neoma/fixtures/docker'
+
+export default async (): Promise<void> => {
+  await startMockServer()
+  await startMailpit()
+}
+```
+
+#### Programmatic API
+
+```typescript
+import { startMockServer, stopMockServer } from '@neoma/fixtures/docker'
+
+// Start with defaults (port 1080, prefix "neoma-test")
+const config = await startMockServer()
+// config.container === "neoma-test-mockserver"
+// config.port === 1080
+// process.env.MOCKSERVER_URL === "http://localhost:1080/mockserver"
+
+// Start with explicit options
+const config = await startMockServer({ prefix: 'myapp-e2e', port: 2080 })
+
+// Stop
+await stopMockServer()
+await stopMockServer({ prefix: 'myapp-e2e' })
+```
+
+#### Port configuration
+
+Ports can be set via options or environment variables. Precedence: option > env var > default.
+
+| Service | Env var (input) | Default | Env var set (output) |
+|---------|----------------|---------|---------------------|
+| MockServer | `MOCKSERVER_PORT` | `1080` | `MOCKSERVER_URL` |
+
+Use Node's built-in `--env-file` flag to load env vars from a file:
+
+```json
+{
+  "test": "node --env-file=.env.test node_modules/.bin/jest --runInBand"
+}
+```
+
+```bash
+# .env.test
+MOCKSERVER_PORT=1081
+NEOMA_TEST_PREFIX=myapp-unit
+```
+
+#### Container naming
+
+Containers are named `{prefix}-{service}` where prefix defaults to the `NEOMA_TEST_PREFIX` env var or `"neoma-test"`. Use different prefixes to avoid collisions when running multiple test tiers in parallel.
+
 ## License
 
 MIT
