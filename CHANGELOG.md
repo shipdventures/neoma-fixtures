@@ -9,11 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `resetMockServer(baseUrl)` — clears all expectations on a MockServer instance
-- `createExpectation(expectation, baseUrl)` — registers a typed expectation
-- `verifyExpectationMatched(httpRequest, baseUrl, count?)` — checks if a request was made
+- `MockServerClient` — class-based MockServer HTTP client with `reset()`, `createExpectation()`, and `verifyExpectationMatched()` methods
 - `@neoma/fixtures/mockserver` — new sub-path export for MockServer client utilities
-- `createMailpitClient(baseUrl)` — factory for a typed Mailpit API client
+- `MailpitClient` — class-based Mailpit HTTP client with `clear()`, `messages()`, `message()`, and `findByRecipient()` methods
 - `@neoma/fixtures/mailpit` — new sub-path export for Mailpit client utilities
 - `startMailpit(options?)` — starts a Mailpit Docker container with SMTP and API ports
 - `stopMailpit(options?)` — stops the Mailpit Docker container

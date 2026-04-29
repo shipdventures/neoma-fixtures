@@ -1,2 +1,1 @@
-export { createMailpitClient } from "./client"
-export type { MailpitClient } from "./types"
+export { MailpitClient } from "./client"

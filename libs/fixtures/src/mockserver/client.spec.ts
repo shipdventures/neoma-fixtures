@@ -6,22 +6,18 @@ import {
   stopMockServer,
 } from "../docker"
 
-import {
-  createExpectation,
-  resetMockServer,
-  verifyExpectationMatched,
-} from "./client"
+import { MockServerClient } from "./client"
 import { type MockserverExpectation } from "./types"
 
-describe("MockServer client", () => {
+describe("MockServerClient", () => {
   const prefix = `neoma-test-msc-${faker.string.alphanumeric(4)}`
   const port = 14_080 + faker.number.int({ min: 0, max: 899 })
   let config: MockServerConfig
-  let baseUrl: string
+  let client: MockServerClient
 
   beforeAll(async () => {
     config = await startMockServer({ prefix, port })
-    baseUrl = `http://localhost:${config.port}/mockserver`
+    client = new MockServerClient(`http://localhost:${config.port}/mockserver`)
   }, 60_000)
 
   afterAll(async () => {
@@ -29,28 +25,25 @@ describe("MockServer client", () => {
   })
 
   beforeEach(async () => {
-    await resetMockServer(baseUrl)
+    await client.reset()
   })
 
-  describe("resetMockServer()", () => {
+  describe("reset()", () => {
     it("should clear all expectations", async () => {
       const path = `/${faker.word.noun()}`
 
-      await createExpectation(
-        {
-          httpRequest: { path, method: "GET" },
-          httpResponse: { statusCode: 200, body: "ok" },
-          times: { unlimited: true },
-        },
-        baseUrl,
-      )
+      await client.createExpectation({
+        httpRequest: { path, method: "GET" },
+        httpResponse: { statusCode: 200, body: "ok" },
+        times: { unlimited: true },
+      })
 
       // Confirm the expectation is active
       const before = await fetch(`http://localhost:${config.port}${path}`)
       expect(before.status).toBe(200)
 
       // Reset
-      await resetMockServer(baseUrl)
+      await client.reset()
 
       // After reset, the expectation should be gone (MockServer returns 404)
       const after = await fetch(`http://localhost:${config.port}${path}`)
@@ -69,7 +62,7 @@ describe("MockServer client", () => {
         times: { unlimited: true },
       }
 
-      await createExpectation(expectation, baseUrl)
+      await client.createExpectation(expectation)
 
       const response = await fetch(`http://localhost:${config.port}${path}`)
 
@@ -86,7 +79,7 @@ describe("MockServer client", () => {
         times: { remainingTimes: 1 },
       }
 
-      await createExpectation(expectation, baseUrl)
+      await client.createExpectation(expectation)
 
       const first = await fetch(`http://localhost:${config.port}${path}`)
       expect(first.status).toBe(200)
@@ -100,21 +93,18 @@ describe("MockServer client", () => {
     it("should return true when a request was matched", async () => {
       const path = `/${faker.word.noun()}`
 
-      await createExpectation(
-        {
-          httpRequest: { path, method: "GET" },
-          httpResponse: { statusCode: 200, body: "ok" },
-          times: { unlimited: true },
-        },
-        baseUrl,
-      )
+      await client.createExpectation({
+        httpRequest: { path, method: "GET" },
+        httpResponse: { statusCode: 200, body: "ok" },
+        times: { unlimited: true },
+      })
 
       await fetch(`http://localhost:${config.port}${path}`)
 
-      const matched = await verifyExpectationMatched(
-        { path, method: "GET" },
-        baseUrl,
-      )
+      const matched = await client.verifyExpectationMatched({
+        path,
+        method: "GET",
+      })
 
       expect(matched).toBe(true)
     })
@@ -122,10 +112,10 @@ describe("MockServer client", () => {
     it("should return false for unmatched requests", async () => {
       const path = `/${faker.word.noun()}`
 
-      const matched = await verifyExpectationMatched(
-        { path, method: "GET" },
-        baseUrl,
-      )
+      const matched = await client.verifyExpectationMatched({
+        path,
+        method: "GET",
+      })
 
       expect(matched).toBe(false)
     })
@@ -133,30 +123,25 @@ describe("MockServer client", () => {
     it("should support a custom count parameter", async () => {
       const path = `/${faker.word.noun()}`
 
-      await createExpectation(
-        {
-          httpRequest: { path, method: "GET" },
-          httpResponse: { statusCode: 200, body: "ok" },
-          times: { unlimited: true },
-        },
-        baseUrl,
-      )
+      await client.createExpectation({
+        httpRequest: { path, method: "GET" },
+        httpResponse: { statusCode: 200, body: "ok" },
+        times: { unlimited: true },
+      })
 
       // Make the request three times
       await fetch(`http://localhost:${config.port}${path}`)
       await fetch(`http://localhost:${config.port}${path}`)
       await fetch(`http://localhost:${config.port}${path}`)
 
-      const matchedThree = await verifyExpectationMatched(
+      const matchedThree = await client.verifyExpectationMatched(
         { path, method: "GET" },
-        baseUrl,
         3,
       )
       expect(matchedThree).toBe(true)
 
-      const matchedTwo = await verifyExpectationMatched(
+      const matchedTwo = await client.verifyExpectationMatched(
         { path, method: "GET" },
-        baseUrl,
         2,
       )
       expect(matchedTwo).toBe(false)

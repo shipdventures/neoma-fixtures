@@ -1,45 +1,13 @@
-import { type MailpitClient } from "./types"
-
 /**
- * Parses a Mailpit API response, throwing a descriptive error on non-2xx
- * status codes or non-JSON bodies.
+ * HTTP client for interacting with the Mailpit REST API.
  *
- * @param res - The fetch response to parse
- * @param label - A human-readable label for error messages
- * @returns The parsed JSON body
- * @throws {Error} When the response status is not OK or the body is not valid JSON
- */
-async function parseResponse(res: Response, label: string): Promise<any> {
-  const text = await res.text()
-
-  if (!res.ok) {
-    throw new Error(`Mailpit ${label} returned ${res.status}: ${text}`)
-  }
-
-  try {
-    return JSON.parse(text)
-  } catch {
-    throw new Error(
-      `Mailpit ${label} returned non-JSON (${res.status}): ${text}`,
-    )
-  }
-}
-
-/**
- * Creates a typed Mailpit API client bound to the given base URL.
- *
- * The client provides methods for interacting with the Mailpit REST API:
- * clearing messages, listing messages, fetching individual messages, and
- * finding messages by recipient.
- *
- * @param baseUrl - The Mailpit API v1 base URL (e.g. `http://localhost:8025/api/v1`)
- * @returns A {@link MailpitClient} instance
+ * Provides methods to clear messages, list messages, fetch individual
+ * messages, and find messages by recipient. Designed for use in
+ * integration and e2e tests.
  *
  * @example
  * ```typescript
- * import { createMailpitClient } from "@neoma/fixtures/mailpit"
- *
- * const client = createMailpitClient("http://localhost:8025/api/v1")
+ * const client = new MailpitClient("http://localhost:8025/api/v1")
  *
  * // Clear all messages
  * await client.clear()
@@ -52,44 +20,116 @@ async function parseResponse(res: Response, label: string): Promise<any> {
  * console.log(msg.Subject, msg.HTML)
  * ```
  */
-export function createMailpitClient(baseUrl: string): MailpitClient {
-  const client: MailpitClient = {
-    clear: async (): Promise<void> => {
-      const res = await fetch(`${baseUrl}/messages`, {
-        method: "DELETE",
-      })
+export class MailpitClient {
+  /**
+   * @param baseUrl - The Mailpit API v1 base URL
+   *   (e.g. `http://localhost:8025/api/v1`)
+   */
+  public constructor(private readonly baseUrl: string) {}
 
-      if (!res.ok) {
-        const text = await res.text()
-        throw new Error(
-          `Mailpit /messages DELETE returned ${res.status}: ${text}`,
-        )
-      }
-    },
+  /**
+   * Deletes all messages from Mailpit.
+   *
+   * @throws {Error} When the Mailpit API returns a non-2xx response
+   *
+   * @example
+   * ```typescript
+   * await client.clear()
+   * ```
+   */
+  public async clear(): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/messages`, {
+      method: "DELETE",
+    })
 
-    messages: async (): Promise<any> => {
-      const res = await fetch(`${baseUrl}/messages`)
-      return parseResponse(res, "/messages")
-    },
-
-    message: async (id: string): Promise<any> => {
-      const res = await fetch(`${baseUrl}/message/${id}`)
-      return parseResponse(res, `/message/${id}`)
-    },
-
-    findByRecipient: async (email: string): Promise<any> => {
-      const { messages } = await client.messages()
-      const match = messages.find((m: any) =>
-        m.To.some(
-          (to: any) => to.Address.toLowerCase() === email.toLowerCase(),
-        ),
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(
+        `Mailpit /messages DELETE returned ${res.status}: ${text}`,
       )
-      if (!match) {
-        throw new Error(`No email found for recipient: ${email}`)
-      }
-      return client.message(match.ID as string)
-    },
+    }
   }
 
-  return client
+  /**
+   * Retrieves all messages from Mailpit.
+   *
+   * @returns The parsed messages list response
+   *
+   * @example
+   * ```typescript
+   * const { messages } = await client.messages()
+   * ```
+   */
+  public async messages(): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/messages`)
+    return this.parseResponse(res, "/messages")
+  }
+
+  /**
+   * Retrieves a single message by ID.
+   *
+   * @param id - The Mailpit message ID
+   * @returns The full message details
+   *
+   * @example
+   * ```typescript
+   * const full = await client.message(id)
+   * console.log(full.Subject, full.HTML)
+   * ```
+   */
+  public async message(id: string): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/message/${id}`)
+    return this.parseResponse(res, `/message/${id}`)
+  }
+
+  /**
+   * Finds the first message sent to a specific recipient.
+   *
+   * Performs a case-insensitive match on the recipient email address.
+   *
+   * @param email - The recipient email address to search for
+   * @returns The full message details
+   * @throws {Error} When no message is found for the given recipient
+   *
+   * @example
+   * ```typescript
+   * const msg = await client.findByRecipient("user@example.com")
+   * console.log(msg.Subject, msg.HTML)
+   * ```
+   */
+  public async findByRecipient(email: string): Promise<any> {
+    const { messages } = await this.messages()
+    const match = messages.find((m: any) =>
+      m.To.some((to: any) => to.Address.toLowerCase() === email.toLowerCase()),
+    )
+    if (!match) {
+      throw new Error(`No email found for recipient: ${email}`)
+    }
+    return this.message(match.ID as string)
+  }
+
+  /**
+   * Parses a Mailpit API response, throwing a descriptive error on non-2xx
+   * status codes or non-JSON bodies.
+   *
+   * @param res - The fetch response to parse
+   * @param label - A human-readable label for error messages
+   * @returns The parsed JSON body
+   * @throws {Error} When the response status is not OK or the body is not valid JSON
+   */
+  private async parseResponse(res: Response, label: string): Promise<any> {
+    const text = await res.text()
+
+    if (!res.ok) {
+      throw new Error(`Mailpit ${label} returned ${res.status}: ${text}`)
+    }
+
+    try {
+      return JSON.parse(text)
+    } catch {
+      throw new Error(
+        `Mailpit ${label} returned non-JSON (${res.status}): ${text}`,
+      )
+    }
+  }
 }

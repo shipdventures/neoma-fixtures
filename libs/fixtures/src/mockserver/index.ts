@@ -1,9 +1,5 @@
-// MockServer client functions
-export {
-  createExpectation,
-  resetMockServer,
-  verifyExpectationMatched,
-} from "./client"
+// MockServer client
+export { MockServerClient } from "./client"
 
 // MockServer types
 export { MockserverBodyTypes, MockserverMatchTypes } from "./types"

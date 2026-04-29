@@ -3,8 +3,7 @@ import { createTransport, type Transporter } from "nodemailer"
 
 import { startMailpit, stopMailpit, type MailpitConfig } from "../docker"
 
-import { createMailpitClient } from "./client"
-import { type MailpitClient } from "./types"
+import { MailpitClient } from "./client"
 
 /**
  * Sends a test email via the given nodemailer transport.
@@ -21,7 +20,7 @@ async function sendEmail(
   })
 }
 
-describe("createMailpitClient", () => {
+describe("MailpitClient", () => {
   const prefix = `neoma-test-mpc-${faker.string.alphanumeric(4)}`
   const smtpPort = 14_025 + faker.number.int({ min: 0, max: 999 })
   const apiPort = 22_025 + faker.number.int({ min: 0, max: 999 })
@@ -31,7 +30,7 @@ describe("createMailpitClient", () => {
 
   beforeAll(async () => {
     config = await startMailpit({ prefix, smtpPort, apiPort })
-    client = createMailpitClient(`http://localhost:${config.apiPort}/api/v1`)
+    client = new MailpitClient(`http://localhost:${config.apiPort}/api/v1`)
     transport = createTransport({
       host: "localhost",
       port: config.smtpPort,

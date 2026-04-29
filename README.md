@@ -134,27 +134,25 @@ Interact with a running MockServer instance. Available via `@neoma/fixtures/mock
 
 ```typescript
 import {
-  createExpectation,
-  resetMockServer,
-  verifyExpectationMatched,
+  MockServerClient,
   MockserverBodyTypes,
   MockserverMatchTypes,
 } from '@neoma/fixtures/mockserver'
 
-const baseUrl = process.env.MOCKSERVER_URL! // e.g. "http://localhost:1080/mockserver"
+const client = new MockServerClient(process.env.MOCKSERVER_URL!)
 
 // Reset all expectations
-await resetMockServer(baseUrl)
+await client.reset()
 
 // Register an expectation
-await createExpectation({
+await client.createExpectation({
   httpRequest: { path: '/api/users', method: 'GET' },
   httpResponse: { statusCode: 200, body: JSON.stringify([{ id: '1' }]) },
   times: { unlimited: true },
-}, baseUrl)
+})
 
 // Register an expectation with body matching
-await createExpectation({
+await client.createExpectation({
   httpRequest: {
     path: '/api/users',
     method: 'POST',
@@ -166,18 +164,16 @@ await createExpectation({
   },
   httpResponse: { statusCode: 201, body: JSON.stringify({ id: '2' }) },
   times: { remainingTimes: 1 },
-}, baseUrl)
+})
 
 // Verify a request was made
-const matched = await verifyExpectationMatched(
+const matched = await client.verifyExpectationMatched(
   { path: '/api/users', method: 'GET' },
-  baseUrl,
 )
 
 // Verify a request was made exactly 3 times
-const matchedThrice = await verifyExpectationMatched(
+const matchedThrice = await client.verifyExpectationMatched(
   { path: '/api/users', method: 'GET' },
-  baseUrl,
   3,
 )
 ```
@@ -187,9 +183,9 @@ const matchedThrice = await verifyExpectationMatched(
 Interact with a running Mailpit instance to inspect captured emails. Available via `@neoma/fixtures/mailpit`.
 
 ```typescript
-import { createMailpitClient } from '@neoma/fixtures/mailpit'
+import { MailpitClient } from '@neoma/fixtures/mailpit'
 
-const client = createMailpitClient(process.env.MAILPIT_API!)
+const client = new MailpitClient(process.env.MAILPIT_API!)
 
 // Clear all messages (useful in beforeEach)
 await client.clear()
