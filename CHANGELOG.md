@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-04-29
+
+### Fixed
+
+- Corrected repository URLs from `shipdventures/neoma-fixtures` to `neomaventures/fixtures` in package.json and changelog
+
 ## [0.2.0] - 2026-04-29
 
 ### Added
@@ -42,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MockLoggerService` — implements `LoggerService` with all methods as `jest.fn()`
 - `toThrowMatching` / `toMatchError` — custom Jest matchers for error class and property assertions
 
-[Unreleased]: https://github.com/shipdventures/neoma-fixtures/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/shipdventures/neoma-fixtures/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/shipdventures/neoma-fixtures/releases/tag/v0.1.0
+[Unreleased]: https://github.com/neomaventures/fixtures/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/neomaventures/fixtures/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/neomaventures/fixtures/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/neomaventures/fixtures/releases/tag/v0.1.0

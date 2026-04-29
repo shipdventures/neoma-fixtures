@@ -1,16 +1,16 @@
 {
   "name": "@neoma/fixtures",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Test fixtures for @neoma/* NestJS packages",
   "author": "Shipdventures",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shipdventures/neoma-fixtures"
+    "url": "https://github.com/neomaventures/fixtures"
   },
   "bugs": {
-    "url": "https://github.com/shipdventures/neoma-fixtures/issues"
+    "url": "https://github.com/neomaventures/fixtures/issues"
   },
-  "homepage": "https://github.com/shipdventures/neoma-fixtures#readme",
+  "homepage": "https://github.com/neomaventures/fixtures#readme",
   "keywords": [
     "nestjs",
     "fixtures",
