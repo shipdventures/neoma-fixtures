@@ -20,12 +20,12 @@ import { type MockRequest, type MockResponse, express } from "../express"
  * @returns A partial ExecutionContext that supports switchToHttp and, when a handler
  * is supplied, getHandler/getClass.
  */
-export const executionContext = (
+export const executionContext = <T>(
   req: MockRequest = express.request(),
   res: MockResponse = req.res,
   handler?:
     | (() => void)
-    | { controller: new (...args: any[]) => any; method: string },
+    | { controller: new (...args: any[]) => T; method: keyof T & string },
   cls?: new (...args: any[]) => any,
 ): Partial<ExecutionContext> => {
   req.res = res
