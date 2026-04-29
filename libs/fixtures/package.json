@@ -29,6 +29,34 @@
     "./matchers": {
       "require": "./dist/matchers/index.js",
       "types": "./dist/matchers/index.d.ts"
+    },
+    "./docker": {
+      "require": "./dist/docker/index.js",
+      "types": "./dist/docker/index.d.ts"
+    },
+    "./setup/mailpit": {
+      "require": "./dist/setup/mailpit.js",
+      "types": "./dist/setup/mailpit.d.ts"
+    },
+    "./setup/minio": {
+      "require": "./dist/setup/minio.js",
+      "types": "./dist/setup/minio.d.ts"
+    },
+    "./setup/mockserver": {
+      "require": "./dist/setup/mockserver.js",
+      "types": "./dist/setup/mockserver.d.ts"
+    },
+    "./teardown/mailpit": {
+      "require": "./dist/teardown/mailpit.js",
+      "types": "./dist/teardown/mailpit.d.ts"
+    },
+    "./teardown/minio": {
+      "require": "./dist/teardown/minio.js",
+      "types": "./dist/teardown/minio.d.ts"
+    },
+    "./teardown/mockserver": {
+      "require": "./dist/teardown/mockserver.js",
+      "types": "./dist/teardown/mockserver.d.ts"
     }
   },
   "scripts": {

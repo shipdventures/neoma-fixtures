@@ -128,6 +128,142 @@ expect(() => service.register(email)).toThrowMatching(
 expect(caughtError).toMatchError(NotFoundException, { message: 'Not found' })
 ```
 
+### Docker container utilities
+
+Start and stop Docker containers for test infrastructure. Available via `@neoma/fixtures/docker`.
+
+#### Zero-config Jest drop-ins
+
+Add to your Jest config for automatic container lifecycle:
+
+```json
+{
+  "globalSetup": "@neoma/fixtures/setup/mockserver",
+  "globalTeardown": "@neoma/fixtures/teardown/mockserver"
+}
+```
+
+For multiple services, write a custom setup file using the programmatic API:
+
+```typescript
+import { startMockServer, startMailpit, startMinIO } from '@neoma/fixtures/docker'
+
+export default async (): Promise<void> => {
+  await startMockServer()
+  await startMailpit()
+  await startMinIO()
+}
+```
+
+#### Programmatic API
+
+```typescript
+import { startMockServer, stopMockServer } from '@neoma/fixtures/docker'
+
+// Start with defaults (port 1080, prefix "neoma-test")
+const config = await startMockServer()
+// config.container === "neoma-test-mockserver"
+// config.port === 1080
+// process.env.MOCKSERVER_URL === "http://localhost:1080/mockserver"
+
+// Start with explicit options
+const config = await startMockServer({ prefix: 'myapp-e2e', port: 2080 })
+
+// Stop
+await stopMockServer()
+await stopMockServer({ prefix: 'myapp-e2e' })
+```
+
+**Mailpit (SMTP + API)**
+
+```typescript
+import { startMailpit, stopMailpit } from '@neoma/fixtures/docker'
+
+// Start with defaults (SMTP 1025, API 8025, prefix "neoma-test")
+const config = await startMailpit()
+// config.container === "neoma-test-mailpit"
+// config.smtpPort === 1025
+// config.apiPort === 8025
+// process.env.SMTP_HOST === "localhost"
+// process.env.SMTP_PORT === "1025"
+// process.env.MAILPIT_API === "http://localhost:8025/api/v1"
+
+// Start with explicit options
+const config = await startMailpit({
+  prefix: 'myapp-e2e',
+  smtpPort: 2025,
+  apiPort: 9025,
+})
+
+// With SMTP authentication (htpasswd file)
+const config = await startMailpit({ htpasswd: '/path/to/auth.htpasswd' })
+
+// Stop
+await stopMailpit()
+await stopMailpit({ prefix: 'myapp-e2e' })
+```
+
+**MinIO (S3-compatible object storage)**
+
+```typescript
+import { startMinIO, stopMinIO } from '@neoma/fixtures/docker'
+
+// Start with defaults (API 9000, Console 9001, bucket "test-bucket", prefix "neoma-test")
+const config = await startMinIO()
+// config.container === "neoma-test-minio"
+// config.apiPort === 9000
+// config.consolePort === 9001
+// config.bucket === "test-bucket"
+// process.env.STORAGE_ENDPOINT === "http://localhost:9000"
+// process.env.STORAGE_REGION === "us-east-1"
+// process.env.STORAGE_ACCESS_KEY === "minioadmin"
+// process.env.STORAGE_SECRET_KEY === "minioadmin"
+// process.env.STORAGE_BUCKET === "test-bucket"
+// process.env.STORAGE_FORCE_PATH_STYLE === "true"
+
+// Start with explicit options
+const config = await startMinIO({
+  prefix: 'myapp-e2e',
+  apiPort: 9100,
+  consolePort: 9101,
+  bucket: 'my-bucket',
+})
+
+// Stop
+await stopMinIO()
+await stopMinIO({ prefix: 'myapp-e2e' })
+```
+
+#### Port configuration
+
+Ports can be set via options or environment variables. Precedence: option > env var > default.
+
+| Service | Env var (input) | Default | Env var set (output) |
+|---------|----------------|---------|---------------------|
+| Mailpit | `MAILPIT_SMTP_PORT` | `1025` | `SMTP_HOST`, `SMTP_PORT` |
+| Mailpit | `MAILPIT_API_PORT` | `8025` | `MAILPIT_API` |
+| MinIO | `MINIO_PORT` | `9000` | `STORAGE_ENDPOINT`, `STORAGE_REGION`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET`, `STORAGE_FORCE_PATH_STYLE` |
+| MinIO | `MINIO_CONSOLE_PORT` | `9001` | |
+| MockServer | `MOCKSERVER_PORT` | `1080` | `MOCKSERVER_URL` |
+
+Use Node's built-in `--env-file` flag to load env vars from a file:
+
+```json
+{
+  "test": "node --env-file=.env.test node_modules/.bin/jest --runInBand"
+}
+```
+
+```bash
+# .env.test
+MOCKSERVER_PORT=1081
+NEOMA_TEST_PREFIX=myapp-unit
+```
+
+#### Container naming
+
+Containers are named `{prefix}-{service}` where prefix defaults to the `NEOMA_TEST_PREFIX` env var or `"neoma-test"`. Use different prefixes to avoid collisions when running multiple test tiers in parallel.
+
 ## License
 
 MIT
