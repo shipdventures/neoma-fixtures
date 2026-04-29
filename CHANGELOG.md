@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-04-29
+
+### Fixed
+
+- Tightened `executionContext()` route handler type safety — the `method` parameter is now typed as `keyof T & string` instead of `string`, providing compile-time assurance that the method exists on the controller class
+
 ## [0.2.1] - 2026-04-29
 
 ### Fixed
@@ -48,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MockLoggerService` — implements `LoggerService` with all methods as `jest.fn()`
 - `toThrowMatching` / `toMatchError` — custom Jest matchers for error class and property assertions
 
-[Unreleased]: https://github.com/neomaventures/fixtures/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/neomaventures/fixtures/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/neomaventures/fixtures/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/neomaventures/fixtures/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/neomaventures/fixtures/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/neomaventures/fixtures/releases/tag/v0.1.0
