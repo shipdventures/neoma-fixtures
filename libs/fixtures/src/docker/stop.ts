@@ -8,12 +8,11 @@ const execFileAsync = promisify(execFile)
  * and swallows any errors so the call is idempotent — it is safe to call
  * even if the container does not exist.
  *
- * @param name - The name of the container to remove
+ * @internal Used by per-service stop functions. Not exported from the
+ * `@neoma/fixtures/docker` barrel — consumers should use `stopMockServer`,
+ * `stopMailpit`, or `stopMinIO` instead.
  *
- * @example
- * ```typescript
- * await stopContainer("neoma-test-mockserver")
- * ```
+ * @param name - The name of the container to remove
  */
 export async function stopContainer(name: string): Promise<void> {
   try {

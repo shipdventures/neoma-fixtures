@@ -119,13 +119,26 @@ export async function waitForHttp(
       break
     }
 
+    const remainingMs = deadline - Date.now()
+    const controller = new AbortController()
+    const timeout = setTimeout(
+      () => controller.abort(),
+      Math.min(intervalMs, remainingMs),
+    )
+
     try {
-      const response = await fetch(url, { method })
+      const response = await fetch(url, {
+        method,
+        signal: controller.signal,
+      })
       if (response.ok) {
+        clearTimeout(timeout)
         return
       }
     } catch {
-      // Connection refused or network error — keep retrying
+      // Connection refused, network error, or aborted — keep retrying
+    } finally {
+      clearTimeout(timeout)
     }
 
     if (attempt < retries - 1) {

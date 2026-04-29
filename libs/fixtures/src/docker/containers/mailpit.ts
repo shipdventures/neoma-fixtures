@@ -1,4 +1,5 @@
 import { execFileSync } from "child_process"
+import { existsSync, statSync } from "fs"
 
 import { waitForTcp } from "../health"
 import { stopContainer as stop } from "../stop"
@@ -93,6 +94,11 @@ export async function startContainer(
   ]
 
   if (htpasswd) {
+    if (!existsSync(htpasswd) || !statSync(htpasswd).isFile()) {
+      throw new Error(
+        `htpasswd path does not exist or is not a file: ${htpasswd}`,
+      )
+    }
     args.push("-v", `${htpasswd}:/auth.htpasswd:ro`)
   }
 
